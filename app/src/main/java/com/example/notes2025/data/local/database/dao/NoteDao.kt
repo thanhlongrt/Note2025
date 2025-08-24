@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
+    @Query("SELECT * FROM notes WHERE id = :id")
+    suspend fun queryNote(id: String): NoteEntity?
+
     @Upsert
     suspend fun upsert(entities: List<NoteEntity>)
 

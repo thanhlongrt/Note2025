@@ -21,4 +21,10 @@ class DefaultNoteRepository
         override suspend fun deleteNotes(ids: List<String>) {
             noteDao.deleteNotes(ids)
         }
+
+        override suspend fun getNoteById(id: String): Note? = noteDao.queryNote(id)?.toNote()
+
+        override suspend fun saveNotes(notes: List<Note>) {
+            noteDao.upsert(notes.map(::NoteEntity))
+        }
     }
