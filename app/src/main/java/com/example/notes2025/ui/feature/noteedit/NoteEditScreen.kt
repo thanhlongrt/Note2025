@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.notes2025.model.Note
-import com.example.notes2025.ui.feature.notelist.component.NotesTopAppBar
+import com.example.notes2025.ui.component.NotesTopAppBar
 import com.example.notes2025.utils.Logger
 
 @Composable

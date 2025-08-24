@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,15 +33,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.notes2025.model.Note
-import com.example.notes2025.ui.feature.notelist.component.AddNotesFloatingButton
-import com.example.notes2025.ui.feature.notelist.component.NoteItem
-import com.example.notes2025.ui.feature.notelist.component.NotesTopAppBar
-import com.example.notes2025.ui.feature.notelist.component.SelectionPanel
+import com.example.notes2025.ui.component.AddNotesFloatingButton
+import com.example.notes2025.ui.component.CustomCheckBox
+import com.example.notes2025.ui.component.NoteItem
+import com.example.notes2025.ui.component.NotesTopAppBar
+import com.example.notes2025.ui.component.SelectionPanel
 import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListUiState
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListViewModel
@@ -94,22 +98,20 @@ fun NoteListScreen(
         },
     )
     Box(modifier = modifier) {
-        Column(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             NotesTopAppBar(
-                isSelectionEnabled = selectionEnabled,
-                allSelected = allSelected,
-                selectedCount = selectedCount,
-                onCheckedChange = {
-                    toggleAllSelection()
+                startContent = {
+                    AppBarStartContent(
+                        selectionEnabled = selectionEnabled,
+                        allSelected = allSelected,
+                        toggleAllSelection = toggleAllSelection,
+                        selectedCount = selectedCount,
+                    )
                 },
-            ) {
-                TextButton(
-                    modifier = Modifier,
-                    onClick = addDummyData,
-                ) {
-                    Text(text = "Add dummy data")
-                }
-            }
+                endContent = {
+                    AppBarEndContent(addDummyData)
+                },
+            )
             if (uiState.isLoading) {
                 // TODO: show loading
             } else {
@@ -191,6 +193,49 @@ fun NoteListScreen(
                 TextButton(onClick = hideConfirmationDialog) { Text(text = "Cancel") }
             },
             onDismissRequest = hideConfirmationDialog,
+        )
+    }
+}
+
+@Composable
+private fun AppBarEndContent(addDummyData: () -> Unit) {
+    TextButton(
+        modifier = Modifier,
+        onClick = addDummyData,
+    ) {
+        Text(text = "Add dummy data")
+    }
+}
+
+@Composable
+private fun AppBarStartContent(
+    selectionEnabled: Boolean,
+    allSelected: Boolean,
+    toggleAllSelection: () -> Unit,
+    selectedCount: Int,
+) {
+    if (selectionEnabled) {
+        CustomCheckBox(
+            modifier =
+                Modifier
+                    .padding(end = 16.dp)
+                    .size(30.dp),
+            checked = allSelected,
+            onCheckedChange = {
+                toggleAllSelection()
+            },
+        )
+    }
+    if (selectionEnabled) {
+        Text(
+            text = "$selectedCount selected",
+            fontSize = 28.sp,
+        )
+    } else {
+        Text(
+            text = "Notes",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
         )
     }
 }

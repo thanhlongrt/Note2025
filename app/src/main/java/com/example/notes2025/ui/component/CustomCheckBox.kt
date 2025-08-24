@@ -1,4 +1,4 @@
-package com.example.notes2025.ui.feature.notelist.component
+package com.example.notes2025.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
