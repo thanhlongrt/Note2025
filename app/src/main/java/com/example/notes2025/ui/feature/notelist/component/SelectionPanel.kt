@@ -22,31 +22,22 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SelectionPanel(
     modifier: Modifier = Modifier,
-    visible: Boolean,
     onClick: () -> Unit = {},
 ) {
-    AnimatedVisibility(
-        modifier = modifier,
-        visible = visible,
-        enter = slideInVertically(initialOffsetY = { it }),
-        exit = slideOutVertically(targetOffsetY = { it }),
+    Row(
+        modifier =
+            modifier
+                .background(Color.White)
+                .clickable {
+                    onClick()
+                },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .height(56.dp)
-                    .background(Color.White)
-                    .clickable {
-                        onClick()
-                    },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            Image(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete",
-            )
-            Text(text = "Delete")
-        }
+        Image(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete",
+        )
+        Text(text = "Delete")
     }
 }

@@ -21,45 +21,30 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AddNotesFloatingButton(
     modifier: Modifier = Modifier,
-    isSelectionEnabled: Boolean,
     isExpanded: Boolean,
     onClick: () -> Unit = {},
 ) {
-    AnimatedVisibility(
+    FloatingActionButton(
         modifier = modifier,
-        visible = !isSelectionEnabled,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        onClick = onClick,
+        containerColor = Color(0xFF6B4EFF),
     ) {
-        FloatingActionButton(
-            onClick = onClick,
-            modifier =
-                Modifier
-                    .shadow(
-                        elevation = 20.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        ambientColor = Color(0xFF6B4EFF),
-                        spotColor = Color(0xFF6B4EFF),
-                    ),
-            containerColor = Color(0xFF6B4EFF),
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                Image(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    colorFilter = ColorFilter.tint(Color.White),
+            Image(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add",
+                colorFilter = ColorFilter.tint(Color.White),
+            )
+            AnimatedVisibility(visible = isExpanded) {
+                Text(
+                    text = "Add New Notes",
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp, top = 3.dp),
+                    color = Color.White,
                 )
-                AnimatedVisibility(visible = isExpanded) {
-                    Text(
-                        text = "Add New Notes",
-                        modifier =
-                            Modifier
-                                .padding(start = 8.dp, top = 3.dp),
-                        color = Color.White,
-                    )
-                }
             }
         }
     }
