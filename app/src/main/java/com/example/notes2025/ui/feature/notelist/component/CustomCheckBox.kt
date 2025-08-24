@@ -1,12 +1,10 @@
 package com.example.notes2025.ui.feature.notelist.component
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.example.notes2025.R
@@ -17,14 +15,6 @@ fun CustomCheckBox(
     checked: Boolean = false,
     onCheckedChange: (() -> Unit)? = null,
 ) {
-    val onPrimaryColor =
-        if (checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val animatedColor by animateColorAsState(
-        if (checked) MaterialTheme.colorScheme.secondary else primaryColor,
-        label = "color",
-    )
-
     Box(
         modifier =
             modifier.clickable(enabled = onCheckedChange != null) {

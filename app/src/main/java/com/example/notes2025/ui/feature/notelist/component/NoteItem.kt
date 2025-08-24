@@ -1,5 +1,10 @@
 package com.example.notes2025.ui.feature.notelist.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -8,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,10 +33,11 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun NoteItem(
     title: String,
+    lastEdit: String,
     contents: String,
-    isSelectable: Boolean = false,
-    isSelected: Boolean = false,
     modifier: Modifier = Modifier,
+    isSelectionEnabled: Boolean = false,
+    isSelected: Boolean = false,
     color: Color = Color.White,
     onNoteClick: () -> Unit = {},
     onNoteLongClick: () -> Unit = {},
@@ -43,13 +50,10 @@ fun NoteItem(
                     shape = RoundedCornerShape(size = 20.dp),
                     ambientColor = Color(0x806B4EFF),
                     spotColor = Color(0x806B4EFF),
-                )
-                .clip(RoundedCornerShape(size = 20.dp))
-                .defaultMinSize(minHeight = 120.dp)
+                ).clip(RoundedCornerShape(size = 20.dp))
                 .background(
                     color = color,
-                )
-                .combinedClickable(
+                ).combinedClickable(
                     onClick = {
                         onNoteClick()
                     },
@@ -58,6 +62,24 @@ fun NoteItem(
                     },
                 ),
     ) {
+        AnimatedVisibility(
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd),
+            visible = isSelectionEnabled,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+        ) {
+            CustomCheckBox(
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .size(30.dp),
+                checked = isSelected,
+                onCheckedChange = onNoteClick,
+            )
+        }
+
         Column(
             modifier =
                 modifier.padding(16.dp),
@@ -69,22 +91,19 @@ fun NoteItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            Text(
+                text = lastEdit,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Spacer(modifier = Modifier.size(size = 10.dp))
             Text(
                 text = contents,
                 fontSize = 20.sp,
                 maxLines = 10,
                 overflow = TextOverflow.Ellipsis,
-            )
-        }
-        if (isSelectable) {
-            CustomCheckBox(
-                modifier =
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                        .size(30.dp),
-                checked = isSelected,
             )
         }
     }
@@ -98,6 +117,8 @@ fun NoteItemPreview() {
         "This is a very very very very long title This is a very very very very long title This is a very very very very long title This is a very very very very long title This is a very very very very long title"
     NoteItem(
         title = title,
+        lastEdit = "Aug 19",
         contents = contents,
+        isSelectionEnabled = true,
     )
 }

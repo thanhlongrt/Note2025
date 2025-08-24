@@ -1,7 +1,6 @@
 package com.example.notes2025.ui.feature.notelist.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,12 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TopAppBar(modifier: Modifier = Modifier) {
+fun NotesTopAppBar(
+    modifier: Modifier = Modifier,
+    isSelectionEnabled: Boolean = false,
+    allSelected: Boolean = false,
+    selectedCount: Int = 0,
+    onCheckedChange: (() -> Unit)? = null,
+) {
     Surface(
         modifier =
             modifier
@@ -37,26 +43,42 @@ fun TopAppBar(modifier: Modifier = Modifier) {
                 Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "Notes",
-                fontSize = 32.sp,
-            )
-            Row {
-                AppBarButton(
-                    onClick = {},
-                    imageVector = Icons.Default.Search,
-                )
-                Spacer(
-                    modifier = Modifier.width(8.dp),
-                )
-                AppBarButton(
-                    onClick = {},
-                    imageVector = Icons.Default.Info,
+            if (isSelectionEnabled) {
+                CustomCheckBox(
+                    modifier =
+                        Modifier
+                            .padding(end = 16.dp)
+                            .size(30.dp),
+                    checked = allSelected,
+                    onCheckedChange = onCheckedChange,
                 )
             }
+            if (isSelectionEnabled) {
+                Text(
+                    text = "$selectedCount selected",
+                    fontSize = 28.sp,
+                )
+            } else {
+                Text(
+                    text = "Notes",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            AppBarButton(
+                onClick = {},
+                imageVector = Icons.Default.Search,
+            )
+            Spacer(
+                modifier = Modifier.width(8.dp),
+            )
+            AppBarButton(
+                onClick = {},
+                imageVector = Icons.Default.Info,
+            )
         }
     }
 }
@@ -81,6 +103,16 @@ private fun AppBarButton(
 
 @Preview
 @Composable
-fun TopAppBarPreview() {
-    TopAppBar()
+fun TopAppBarPreviewSelectionDisabled() {
+    NotesTopAppBar(
+        isSelectionEnabled = false,
+    )
+}
+
+@Preview
+@Composable
+fun TopAppBarPreviewSelectionEnabled() {
+    NotesTopAppBar(
+        isSelectionEnabled = true,
+    )
 }
