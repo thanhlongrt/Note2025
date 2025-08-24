@@ -1,7 +1,7 @@
 package com.example.notes2025.ui.feature.notelist.viewmodel
 
-import com.example.notes2025.Logger
 import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
+import com.example.notes2025.utils.Logger
 
 data class NoteListUiState(
     val isLoading: Boolean = false,

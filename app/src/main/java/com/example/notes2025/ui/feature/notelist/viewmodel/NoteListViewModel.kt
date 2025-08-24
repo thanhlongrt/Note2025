@@ -2,10 +2,10 @@ package com.example.notes2025.ui.feature.notelist.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notes2025.Logger
 import com.example.notes2025.data.repository.NoteRepository
 import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.utils.DummyDataProvider
+import com.example.notes2025.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,15 +40,12 @@ class NoteListViewModel
             }
         }
 
-        fun onNoteClick(note: SelectableNote) {
-            if (currentState.selectionState == SelectionState.On) {
-                _uiState.value =
-                    currentState.copy(
-                        notes = currentState.notes.toggleSelection(note),
-                    )
-            } else {
-                // TODO: open NoteEditScreen
-            }
+        fun onNoteSelected(note: SelectableNote) {
+            if (currentState.selectionState != SelectionState.On) return
+            _uiState.value =
+                currentState.copy(
+                    notes = currentState.notes.toggleSelection(note),
+                )
         }
 
         fun onNoteLongClick(note: SelectableNote) {
@@ -105,8 +102,7 @@ class NoteListViewModel
                 it.copy(isSelected = isSelected)
             }
 
-        fun onFabClick() {
-            // TODO: open NoteEditScreen
+        fun addDummyData() {
             viewModelScope.launch(Dispatchers.IO) {
                 noteRepository.insertNotes(
                     DummyDataProvider.dummyNotes().map(SelectableNote::toNote),

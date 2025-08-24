@@ -1,4 +1,4 @@
-package com.example.notes2025
+package com.example.notes2025.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.notes2025.ui.feature.notelist.NoteListScreen
 import com.example.notes2025.ui.theme.Notes2025Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,16 +18,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Notes2025Theme(
-                darkTheme = false,
-                dynamicColor = false,
-            ) {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NoteListScreen(
-                        modifier = Modifier.padding(innerPadding),
-                    )
-                }
-            }
+            NotesApp()
+        }
+    }
+}
+
+@Composable
+fun NotesApp() {
+    Notes2025Theme(
+        darkTheme = false,
+        dynamicColor = false,
+    ) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            NotesNavHost(
+                modifier = Modifier.padding(innerPadding),
+            )
         }
     }
 }

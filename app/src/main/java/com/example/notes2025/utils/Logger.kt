@@ -1,4 +1,4 @@
-package com.example.notes2025
+package com.example.notes2025.utils
 
 import android.util.Log
 

@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +34,7 @@ fun NotesTopAppBar(
     allSelected: Boolean = false,
     selectedCount: Int = 0,
     onCheckedChange: (() -> Unit)? = null,
+    endContent: @Composable () -> Unit = {},
 ) {
     Surface(
         modifier =
@@ -68,36 +72,9 @@ fun NotesTopAppBar(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            AppBarButton(
-                onClick = {},
-                imageVector = Icons.Default.Search,
-            )
-            Spacer(
-                modifier = Modifier.width(8.dp),
-            )
-            AppBarButton(
-                onClick = {},
-                imageVector = Icons.Default.Info,
-            )
-        }
-    }
-}
 
-@Composable
-private fun AppBarButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
-    imageVector: ImageVector,
-) {
-    IconButton(
-        modifier = modifier,
-        onClick = onClick,
-    ) {
-        Image(
-            modifier = Modifier.size(28.dp),
-            imageVector = imageVector,
-            contentDescription = null,
-        )
+            endContent()
+        }
     }
 }
 

@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.notes2025.model.Note
 import com.example.notes2025.ui.feature.notelist.component.AddNotesFloatingButton
 import com.example.notes2025.ui.feature.notelist.component.NoteItem
 import com.example.notes2025.ui.feature.notelist.component.NotesTopAppBar
@@ -47,11 +48,41 @@ import com.example.notes2025.ui.feature.notelist.viewmodel.SelectionState
 import com.example.notes2025.utils.DummyDataProvider
 
 @Composable
-fun NoteListScreen(
+fun NoteListRoute(
     modifier: Modifier = Modifier,
     viewModel: NoteListViewModel = hiltViewModel(),
+    openNoteEditScreen: (Note?) -> Unit = {},
 ) {
     val uiState: NoteListUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    NoteListScreen(
+        modifier = modifier,
+        uiState = uiState,
+        clearSelection = viewModel::clearSelection,
+        toggleAllSelection = viewModel::toggleAllSelection,
+        onNoteSelected = viewModel::onNoteSelected,
+        onNoteLongClick = viewModel::onNoteLongClick,
+        showConfirmationDialog = viewModel::showConfirmationDialog,
+        deleteSelectedNotes = viewModel::deleteSelectedNotes,
+        hideConfirmationDialog = viewModel::hideConfirmationDialog,
+        openNoteEditScreen = openNoteEditScreen,
+        addDummyData = viewModel::addDummyData,
+    )
+}
+
+@Composable
+fun NoteListScreen(
+    modifier: Modifier = Modifier,
+    uiState: NoteListUiState,
+    clearSelection: () -> Unit = {},
+    toggleAllSelection: () -> Unit = {},
+    onNoteSelected: (SelectableNote) -> Unit = {},
+    onNoteLongClick: (SelectableNote) -> Unit = {},
+    showConfirmationDialog: () -> Unit = {},
+    deleteSelectedNotes: () -> Unit = {},
+    hideConfirmationDialog: () -> Unit = {},
+    openNoteEditScreen: (Note?) -> Unit = {},
+    addDummyData: () -> Unit = {},
+) {
     val lazyGridState = rememberLazyGridState()
     val selectedCount = uiState.selectedCount
     val allSelected = uiState.allSelected
@@ -59,7 +90,7 @@ fun NoteListScreen(
     BackHandler(
         enabled = selectionEnabled,
         onBack = {
-            viewModel.clearSelection()
+            clearSelection()
         },
     )
     Box(modifier = modifier) {
@@ -69,9 +100,16 @@ fun NoteListScreen(
                 allSelected = allSelected,
                 selectedCount = selectedCount,
                 onCheckedChange = {
-                    viewModel.toggleAllSelection()
+                    toggleAllSelection()
                 },
-            )
+            ) {
+                TextButton(
+                    modifier = Modifier,
+                    onClick = addDummyData,
+                ) {
+                    Text(text = "Add dummy data")
+                }
+            }
             if (uiState.isLoading) {
                 // TODO: show loading
             } else {
@@ -79,10 +117,14 @@ fun NoteListScreen(
                     notes = uiState.notes,
                     isSelectionEnabled = selectionEnabled,
                     onNoteClick = { note ->
-                        viewModel.onNoteClick(note)
+                        if (selectionEnabled) {
+                            onNoteSelected(note)
+                        } else {
+                            openNoteEditScreen(note.toNote())
+                        }
                     },
                     onNoteLongClick = { note ->
-                        viewModel.onNoteLongClick(note)
+                        onNoteLongClick(note)
                     },
                     lazyGridState = lazyGridState,
                 )
@@ -113,7 +155,7 @@ fun NoteListScreen(
         ) {
             AddNotesFloatingButton(
                 isExpanded = isExpanded,
-                onClick = viewModel::onFabClick,
+                onClick = { openNoteEditScreen(null) },
             )
         }
 
@@ -128,9 +170,7 @@ fun NoteListScreen(
             exit = slideOutVertically(targetOffsetY = { it }),
         ) {
             SelectionPanel(
-                onClick = {
-                    viewModel.showConfirmationDialog()
-                },
+                onClick = showConfirmationDialog,
             )
         }
     }
@@ -142,15 +182,15 @@ fun NoteListScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deleteSelectedNotes()
-                        viewModel.hideConfirmationDialog()
+                        deleteSelectedNotes()
+                        hideConfirmationDialog()
                     },
                 ) { Text(text = "Delete") }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::hideConfirmationDialog) { Text(text = "Cancel") }
+                TextButton(onClick = hideConfirmationDialog) { Text(text = "Cancel") }
             },
-            onDismissRequest = viewModel::hideConfirmationDialog,
+            onDismissRequest = hideConfirmationDialog,
         )
     }
 }
