@@ -15,13 +15,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun AddNotesFloatingButton(
+    modifier: Modifier = Modifier,
     isSelectionEnabled: Boolean,
     isExpanded: Boolean,
-    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     AnimatedVisibility(
         modifier = modifier,
@@ -30,14 +32,10 @@ fun AddNotesFloatingButton(
         exit = fadeOut(),
     ) {
         FloatingActionButton(
-            onClick = {
-            },
+            onClick = onClick,
             modifier =
                 Modifier
-                    .padding(
-                        bottom = 56.dp,
-                        end = 16.dp,
-                    ).shadow(
+                    .shadow(
                         elevation = 20.dp,
                         shape = RoundedCornerShape(16.dp),
                         ambientColor = Color(0xFF6B4EFF),
@@ -48,13 +46,18 @@ fun AddNotesFloatingButton(
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
-                Image(imageVector = Icons.Default.Add, contentDescription = "Add")
+                Image(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    colorFilter = ColorFilter.tint(Color.White),
+                )
                 AnimatedVisibility(visible = isExpanded) {
                     Text(
                         text = "Add New Notes",
                         modifier =
                             Modifier
                                 .padding(start = 8.dp, top = 3.dp),
+                        color = Color.White,
                     )
                 }
             }

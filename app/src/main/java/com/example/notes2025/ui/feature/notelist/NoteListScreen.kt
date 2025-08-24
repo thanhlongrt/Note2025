@@ -7,11 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -22,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.notes2025.utils.DummyDataProvider
 import com.example.notes2025.ui.feature.notelist.component.AddNotesFloatingButton
 import com.example.notes2025.ui.feature.notelist.component.NoteItem
 import com.example.notes2025.ui.feature.notelist.component.NotesTopAppBar
@@ -31,6 +35,7 @@ import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListUiState
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListViewModel
 import com.example.notes2025.ui.feature.notelist.viewmodel.SelectionState
+import com.example.notes2025.utils.DummyDataProvider
 
 @Composable
 fun NoteListScreen(
@@ -41,14 +46,14 @@ fun NoteListScreen(
     val lazyGridState = rememberLazyGridState()
     val selectedCount = uiState.selectedCount
     val allSelected = uiState.allSelected
+    val selectionEnabled = uiState.selectionState == SelectionState.On
     BackHandler(
-        enabled = uiState.selectionState == SelectionState.On,
+        enabled = selectionEnabled,
         onBack = {
             viewModel.clearSelection()
         },
     )
     Box {
-        val selectionEnabled = uiState.selectionState == SelectionState.On
         Column(modifier = modifier) {
             NotesTopAppBar(
                 isSelectionEnabled = selectionEnabled,
@@ -81,15 +86,44 @@ fun NoteListScreen(
         AddNotesFloatingButton(
             isSelectionEnabled = selectionEnabled,
             isExpanded = isExpanded,
-            modifier = modifier.align(Alignment.BottomEnd),
+            modifier =
+                modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        bottom = 56.dp,
+                        end = 16.dp,
+                    ),
+            onClick = viewModel::onFabClick,
         )
 
         SelectionPanel(
-            modifier = modifier.align(Alignment.BottomCenter),
+            modifier =
+                modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
             visible = selectionEnabled && selectedCount > 0,
             onClick = {
-                viewModel.deleteSelectedNotes()
+                viewModel.showConfirmationDialog()
             },
+        )
+    }
+
+    if (uiState.showConfirmationDialog) {
+        AlertDialog(
+            title = { Text(text = "Delete All Selected Notes") },
+            text = { Text(text = "Are you sure you want to delete?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteSelectedNotes()
+                        viewModel.hideConfirmationDialog()
+                    },
+                ) { Text(text = "Delete") }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::hideConfirmationDialog) { Text(text = "Cancel") }
+            },
+            onDismissRequest = viewModel::hideConfirmationDialog,
         )
     }
 }
@@ -99,13 +133,14 @@ fun NoteList(
     modifier: Modifier = Modifier,
     notes: List<SelectableNote>,
     isSelectionEnabled: Boolean = false,
+    columnCount: Int = 2,
     onNoteClick: (SelectableNote) -> Unit = {},
     onNoteLongClick: (SelectableNote) -> Unit = {},
     lazyGridState: LazyGridState = rememberLazyGridState(),
 ) {
     LazyVerticalGrid(
         modifier = modifier.fillMaxHeight(),
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(columnCount),
         state = lazyGridState,
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -120,14 +155,22 @@ fun NoteList(
                 title = note.title,
                 lastEdit = note.lastEditStr,
                 contents = note.contents,
-                modifier = Modifier.height(300.dp),
+                modifier =
+                    Modifier
+                        .height(280.dp),
                 isSelectionEnabled = isSelectionEnabled,
                 isSelected = note.isSelected,
                 onNoteClick = { onNoteClick(note) },
                 onNoteLongClick = { onNoteLongClick(note) },
             )
         }
-        item { Spacer(modifier = Modifier.height(96.dp)) }
+
+        // Space for FAB
+        repeat(columnCount) {
+            item {
+                Spacer(modifier = Modifier.height(96.dp))
+            }
+        }
     }
 }
 

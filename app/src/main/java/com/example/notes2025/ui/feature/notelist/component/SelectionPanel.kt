@@ -34,7 +34,6 @@ fun SelectionPanel(
         Row(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .height(56.dp)
                     .background(Color.White)
                     .clickable {

@@ -74,7 +74,7 @@ fun NoteItem(
                 modifier =
                     Modifier
                         .padding(16.dp)
-                        .size(30.dp),
+                        .size(28.dp),
                 checked = isSelected,
                 onCheckedChange = onNoteClick,
             )
@@ -87,21 +87,21 @@ fun NoteItem(
             Text(
                 modifier = Modifier.fillMaxWidth(fraction = 0.66f),
                 text = title,
-                fontSize = 25.sp,
+                fontSize = 22.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = lastEdit,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.size(size = 10.dp))
+            Spacer(modifier = Modifier.size(size = 8.dp))
             Text(
                 text = contents,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 maxLines = 10,
                 overflow = TextOverflow.Ellipsis,
             )

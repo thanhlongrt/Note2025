@@ -7,6 +7,7 @@ data class NoteListUiState(
     val isLoading: Boolean = false,
     val notes: List<SelectableNote> = emptyList(),
     val selectionState: SelectionState = SelectionState.Off,
+    val showConfirmationDialog: Boolean = false,
 ) {
     val allSelected: Boolean
         get() =

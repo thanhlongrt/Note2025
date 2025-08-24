@@ -1,18 +1,24 @@
 package com.example.notes2025.ui.feature.notelist.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.notes2025.utils.DummyDataProvider
+import androidx.lifecycle.viewModelScope
+import com.example.notes2025.Logger
+import com.example.notes2025.data.repository.NoteRepository
 import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
+import com.example.notes2025.utils.DummyDataProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteListViewModel
     @Inject
     constructor(
-        // TODO: Add dependencies here
+        private val noteRepository: NoteRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(NoteListUiState())
         val uiState = _uiState.asStateFlow()
@@ -23,7 +29,15 @@ class NoteListViewModel
         }
 
         fun fetchNotes() {
-            _uiState.value = NoteListUiState(notes = DummyDataProvider.dummyNotes())
+            viewModelScope.launch(Dispatchers.IO) {
+                noteRepository
+                    .getNotesStream()
+                    .onEach { notes ->
+                        Logger.debug("fetchNotes: onEach \n $notes")
+                    }.collect { notes ->
+                        _uiState.value = currentState.copy(notes = notes.map(::SelectableNote))
+                    }
+            }
         }
 
         fun onNoteClick(note: SelectableNote) {
@@ -62,7 +76,14 @@ class NoteListViewModel
         }
 
         fun deleteSelectedNotes() {
-            // TODO: delete selected notes
+            viewModelScope.launch(Dispatchers.IO) {
+                val notesToDelete =
+                    currentState.notes
+                        .filter(SelectableNote::isSelected)
+                        .map(SelectableNote::id)
+                clearSelection()
+                noteRepository.deleteNotes(notesToDelete)
+            }
         }
 
         private fun List<SelectableNote>.toggleSelection(note: SelectableNote): List<SelectableNote> =
@@ -83,4 +104,21 @@ class NoteListViewModel
             map {
                 it.copy(isSelected = isSelected)
             }
+
+        fun onFabClick() {
+            // TODO: open NoteEditScreen
+            viewModelScope.launch(Dispatchers.IO) {
+                noteRepository.insertNotes(
+                    DummyDataProvider.dummyNotes().map(SelectableNote::toNote),
+                )
+            }
+        }
+
+        fun showConfirmationDialog() {
+            _uiState.value = currentState.copy(showConfirmationDialog = true)
+        }
+
+        fun hideConfirmationDialog() {
+            _uiState.value = currentState.copy(showConfirmationDialog = false)
+        }
     }

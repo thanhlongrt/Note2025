@@ -1,17 +1,16 @@
-package com.example.notes2025.ui.feature.notelist.uimodel
+package com.example.notes2025.data.local.database.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.notes2025.model.Note
-import com.example.notes2025.utils.DateUtils
 
-data class SelectableNote(
-    val id: String,
-    val title: String = "",
-    val contents: String = "",
-    val lastEdit: Long = 0,
-    val isSelected: Boolean = false,
+@Entity(tableName = "notes")
+data class NoteEntity(
+    @PrimaryKey() val id: String,
+    val title: String,
+    val contents: String,
+    val lastEdit: Long = System.currentTimeMillis(),
 ) {
-    val lastEditStr: String = DateUtils.dateLongToString(lastEdit)
-
     constructor(note: Note) : this(
         id = note.id,
         title = note.title,
