@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,8 +72,8 @@ fun NoteItem(
             CustomCheckBox(
                 modifier =
                     Modifier
-                        .padding(16.dp)
-                        .size(28.dp),
+                        .padding(12.dp)
+                        .size(24.dp),
                 checked = isSelected,
                 onCheckedChange = onNoteClick,
             )
@@ -83,23 +84,24 @@ fun NoteItem(
                 modifier.padding(16.dp),
         ) {
             Text(
-                modifier = Modifier.fillMaxWidth(fraction = 0.66f),
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 text = title,
-                fontSize = 22.sp,
-                maxLines = 1,
+                fontSize = 16.sp,
+                maxLines = 2,
+                fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = lastEdit,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 color = Color.Gray,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.size(size = 8.dp))
             Text(
                 text = contents,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 maxLines = 10,
                 overflow = TextOverflow.Ellipsis,
             )
