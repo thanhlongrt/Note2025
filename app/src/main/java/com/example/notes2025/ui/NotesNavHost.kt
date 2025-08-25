@@ -21,21 +21,14 @@ fun NotesNavHost(
     ) {
         composable(route = NoteListDestination.route) {
             NoteListRoute(
-                openNoteEditScreen = { note ->
-                    val route =
-                        if (note == null) {
-                            NoteEditDestination.route
-                        } else {
-                            "${NoteEditDestination.route}/${note.id}"
-                        }
-                    navController.navigate(route)
-                },
+                navController = navController,
             )
         }
         composable(
             route = NoteEditDestination.route,
         ) { navBackStackEntry ->
             NoteEditRoute(
+                navController = navController,
                 noteId = null,
             )
         }
@@ -44,8 +37,9 @@ fun NotesNavHost(
             arguments = NoteEditDestination.arguments,
         ) { navBackStackEntry ->
             val noteId =
-                navBackStackEntry.arguments?.getString(NoteEditDestination.NOTE_ID_ARG)
+                navBackStackEntry.arguments?.getInt(NoteEditDestination.NOTE_ID_ARG)
             NoteEditRoute(
+                navController = navController,
                 noteId = noteId,
             )
         }

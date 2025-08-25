@@ -18,8 +18,7 @@ data object NoteEditDestination : NotesDestination {
     val arguments =
         listOf(
             navArgument(NOTE_ID_ARG) {
-                type = NavType.StringType
-                nullable = true
+                type = NavType.IntType
             },
         )
 }

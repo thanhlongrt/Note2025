@@ -1,14 +1,12 @@
-package com.example.notes2025.data.local.database.entity
+package com.example.notes2025.ui.feature.noteedit.uimodel
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.example.notes2025.model.Note
+import com.example.notes2025.utils.DateUtils
 
-@Entity(tableName = "notes")
-data class NoteEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    val title: String,
-    val contents: String,
+data class EditableNote(
+    val id: Int? = null,
+    val title: String = "",
+    val contents: String = "",
     val lastEdit: Long = System.currentTimeMillis(),
 ) {
     constructor(note: Note) : this(
@@ -18,10 +16,10 @@ data class NoteEntity(
         lastEdit = note.lastEdit,
     )
 
-    fun toNote(): Note =
+    fun toNote() =
         Note(
             id = id,
-            title = title,
+            title = title.ifBlank { "Note ${DateUtils.getDateStringToday()}" },
             contents = contents,
             lastEdit = lastEdit,
         )

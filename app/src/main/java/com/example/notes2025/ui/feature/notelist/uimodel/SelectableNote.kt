@@ -4,13 +4,18 @@ import com.example.notes2025.model.Note
 import com.example.notes2025.utils.DateUtils
 
 data class SelectableNote(
-    val id: String,
+    val id: Int? = null,
     val title: String = "",
     val contents: String = "",
-    val lastEdit: Long = 0,
+    val lastEdit: Long = DateUtils.currentTimeStamp(),
     val isSelected: Boolean = false,
 ) {
-    val lastEditStr: String = DateUtils.dateLongToString(lastEdit)
+    val lastEditStr: String
+        get() =
+            DateUtils.dateLongToString(
+                dateLong = lastEdit,
+                format = DateUtils.FORMAT_ddMMyyyy_HHmm,
+            )
 
     constructor(note: Note) : this(
         id = note.id,
