@@ -3,7 +3,7 @@ package com.example.notes2025.utils
 import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 
 object DummyDataProvider {
-    fun dummyNotesByAmount(amount: Int = 20): List<SelectableNote> =
+    fun dummyNotesByAmount(amount: Int = 200): List<SelectableNote> =
         (1..amount).reversed().map {
             SelectableNote(
                 title = "Note $it",

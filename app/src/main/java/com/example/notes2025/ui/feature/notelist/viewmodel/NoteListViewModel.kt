@@ -8,6 +8,7 @@ import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,11 @@ import javax.inject.Inject
 class NoteListViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
 ) : ViewModel() {
+
+    companion object {
+        private const val PAGE_SIZE = 20
+    }
+
     private val _notes = MutableStateFlow(listOf<SelectableNote>())
     val notes = _notes.asStateFlow()
 
@@ -40,21 +46,27 @@ class NoteListViewModel @Inject constructor(
     private val _shouldScrollToTop = MutableStateFlow(false)
     val shouldScrollToTop = _shouldScrollToTop.asStateFlow()
 
+    private val _reachedEnd = MutableStateFlow(false) // TRUE: no more notes to load
+    val reachedEnd = _reachedEnd.asStateFlow()
+
+    private var nextPage = 0 // page to load
+    private val pageSize = PAGE_SIZE
+
+    // after adding/removing items, we need to update the offset
+    private var additionalFetchOffset = 0
+
     init {
 //            fetchNotes()
         loadMoreNotes()
     }
 
-    private var nextPage = 0
-    private val pageSize = 20
-    private var reachedEnd = false
-    private var additionalFetchOffset =
-        0 // after adding/removing items, we need to update the offset
-
     fun loadMoreNotes() {
-        if (_isLoadingMore.value || _selectionState.value == SelectionState.On) return // if already loading, return
+        if (_isLoadingMore.value // if already loading, abort
+            || _reachedEnd.value // there're no more notes, abort
+        ) return
         _isLoadingMore.value = true // mark as loading
         viewModelScope.launch(Dispatchers.IO) {
+
             if (nextPage == 0) {
                 additionalFetchOffset = 0 // if this is the first page, no need to add offset
             }
@@ -63,6 +75,7 @@ class NoteListViewModel @Inject constructor(
             additionalFetchOffset =
                 additionalFetchOffset % pageSize // remaining offset after page number  is updated
             Logger.debug("fetchPagedNotes: limit = $pageSize, additionalFetchOffset = $additionalFetchOffset ")
+
             val newPage =
                 noteRepository
                     .fetchPagedNotes(
@@ -70,11 +83,17 @@ class NoteListViewModel @Inject constructor(
                         page = nextPage,
                         additionalFetchOffset = additionalFetchOffset,
                     ).map(::SelectableNote)
-            if (newPage.size < pageSize) reachedEnd = true
+
+            if (newPage.size < pageSize) {
+                _reachedEnd.value = true
+            } else {
+                nextPage++
+            }
+
+            _isLoadingMore.value = false
+
             val newNotes = _notes.value.toMutableList().apply { addAll(newPage) }
             updateNoteState(newNotes)
-            _isLoadingMore.value = false
-            nextPage++
         }
     }
 
@@ -120,14 +139,18 @@ class NoteListViewModel @Inject constructor(
                     .mapNotNull(SelectableNote::id)
             clearSelection()
             noteRepository.deleteNotes(notesToDelete)
+            val deletedCount = notesToDelete.size
+            additionalFetchOffset = additionalFetchOffset - deletedCount
+            Logger.debug(
+                "Deleted $deletedCount note(s), decrease additionalFetchOffset value by $deletedCount -> $additionalFetchOffset"
+            )
             val updatedList =
                 _notes.value.toMutableList().apply { removeAll { it.id in notesToDelete } }
             updateNoteState(updatedList)
-            additionalFetchOffset = additionalFetchOffset - notesToDelete.size
         }
     }
 
-    // for developers
+    // for development
     fun addDummyData() {
         viewModelScope.launch(Dispatchers.IO) {
             (1..200).reversed().map {
@@ -152,42 +175,49 @@ class NoteListViewModel @Inject constructor(
         _shouldShowConfirmationDialog.value = false
     }
 
-    fun onNoteAddedOrUpdated(newNote: EditableNote) {
+    fun addOrUpdateNote(newNote: EditableNote) {
         newNote.id?.let { id ->
             // if new note is updated
-            viewModelScope.launch {
-                val updatedNote = newNote.toNote()
-                noteRepository.saveNote(updatedNote) // save item to the database
-                Logger.debug("Update: $updatedNote")
-                // remove the old item and add the newly updated item to the top
-                val updatedList =
-                    _notes.value.toMutableList().apply {
-                        removeIf { it.id == id }
-                        add(0, SelectableNote(updatedNote))
-                    }
-                updateNoteState(updatedList)
-                _shouldScrollToTop.value = true
-            }
+            updateNote(newNote, id)
         } ?: run {
             // if new note is added
-            viewModelScope.launch {
-                // insert into database to get the id
-                val id = noteRepository.insertNote(
-                    newNote.toNote().also { Logger.debug("Insert: $it") }
-                )
-                val note =
-                    noteRepository.getNoteById(id.toInt()) // get the inserted item from the database
-                additionalFetchOffset = additionalFetchOffset + 1
-                Logger.debug("A new note is added, increase additionalFetchOffset value by 1 -> $additionalFetchOffset")
-                // add the newly added item to the top
-                val updatedList =
-                    _notes.value.toMutableList().apply {
-                        note?.let { add(0, SelectableNote(it)) }
-                    }
-                updateNoteState(updatedList)
-                _shouldScrollToTop.value = true
-            }
+            addNote(newNote)
         }
+    }
+
+    private fun addNote(newNote: EditableNote): Job = viewModelScope.launch {
+        // insert into database to get id
+        val id = noteRepository.insertNote(
+            newNote.toNote().also { Logger.debug("Insert: $it") }
+        )
+        // get the inserted item from the database
+        val note = noteRepository.getNoteById(id.toInt())
+        additionalFetchOffset = additionalFetchOffset + 1
+        Logger.debug("A new note is added, increase additionalFetchOffset value by 1 -> $additionalFetchOffset")
+        // add the newly added item to the top
+        val updatedList =
+            _notes.value.toMutableList().apply {
+                note?.let { add(0, SelectableNote(it)) }
+            }
+        updateNoteState(updatedList)
+        _shouldScrollToTop.value = true
+    }
+
+    private fun updateNote(
+        newNote: EditableNote,
+        id: Int
+    ): Job = viewModelScope.launch {
+        val updatedNote = newNote.toNote()
+        noteRepository.saveNote(updatedNote) // save item to the database
+        Logger.debug("Update: $updatedNote")
+        // remove the old item and add the newly updated item to the top
+        val updatedList =
+            _notes.value.toMutableList().apply {
+                removeIf { it.id == id }
+                add(0, SelectableNote(updatedNote))
+            }
+        updateNoteState(updatedList)
+        _shouldScrollToTop.value = true
     }
 
     fun resetScrollToTopState() {

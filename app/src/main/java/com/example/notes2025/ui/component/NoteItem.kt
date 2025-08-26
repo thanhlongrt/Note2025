@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -49,10 +48,12 @@ fun NoteItem(
                     shape = RoundedCornerShape(size = 20.dp),
                     ambientColor = Color(0x806B4EFF),
                     spotColor = Color(0x806B4EFF),
-                ).clip(RoundedCornerShape(size = 20.dp))
+                )
+                .clip(RoundedCornerShape(size = 20.dp))
                 .background(
                     color = color,
-                ).combinedClickable(
+                )
+                .combinedClickable(
                     onClick = {
                         onNoteClick()
                     },
@@ -69,7 +70,7 @@ fun NoteItem(
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
         ) {
-            CustomCheckBox(
+            NoteCheckBox(
                 modifier =
                     Modifier
                         .padding(12.dp)

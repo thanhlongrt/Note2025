@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Notes2025</string>
+    <string name="title_delete_notes">Delete Notes</string>
+    <string name="message_delete_notes_confirmation">Are you sure you want to delete all selected items?</string>
+    <string name="title_selected">%1$d selected</string>
+    <string name="message_no_more_notes">There\'re no more notes.</string>
+    <string name="title_notes">Notes</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="hint_title">Title...</string>
+    <string name="hint_enter_your_contents">Enter your contents...</string>
+    <string name="button_add_new_notes">Add New Notes</string>
 </resources>

@@ -31,13 +31,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.notes2025.R
 import com.example.notes2025.model.Note
 import com.example.notes2025.ui.NoteEditDestination
 import com.example.notes2025.ui.component.AddNotesFloatingButton
@@ -56,6 +62,7 @@ import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListViewModel
 import com.example.notes2025.ui.feature.notelist.viewmodel.SelectionState
 import com.example.notes2025.utils.DummyDataProvider
+import com.example.notes2025.utils.Logger
 
 @Composable
 fun NoteListRoute(
@@ -70,6 +77,7 @@ fun NoteListRoute(
     val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
     val shouldShowConfirmationDialog by viewModel.shouldShowConfirmationDialog.collectAsStateWithLifecycle()
     val shouldScrollToTop by viewModel.shouldScrollToTop.collectAsStateWithLifecycle()
+    val reachedEnd by viewModel.reachedEnd.collectAsStateWithLifecycle()
     NoteListScreen(
         modifier = modifier,
         notes = notes,
@@ -79,6 +87,7 @@ fun NoteListRoute(
         isLoadingMore = isLoadingMore,
         shouldShowConfirmationDialog = shouldShowConfirmationDialog,
         shouldScrollToTop = shouldScrollToTop,
+        reachedEnd = reachedEnd,
         clearSelection = viewModel::clearSelection,
         toggleAllSelection = viewModel::toggleAllSelection,
         onNoteSelected = viewModel::onNoteSelected,
@@ -111,6 +120,7 @@ fun NoteListScreen(
     isLoadingMore: Boolean = false,
     shouldShowConfirmationDialog: Boolean = false,
     shouldScrollToTop: Boolean = false,
+    reachedEnd: Boolean = false,
     clearSelection: () -> Unit = {},
     toggleAllSelection: () -> Unit = {},
     onNoteSelected: (SelectableNote) -> Unit = {},
@@ -159,6 +169,7 @@ fun NoteListScreen(
                 notes = notes,
                 isSelectionEnabled = selectionEnabled,
                 isLoadingMore = isLoadingMore,
+                reachedEnd = reachedEnd,
                 onNoteClick = { note ->
                     if (selectionEnabled) {
                         onNoteSelected(note)
@@ -189,8 +200,8 @@ fun NoteListScreen(
                     .shadow(
                         elevation = 20.dp,
                         shape = RoundedCornerShape(16.dp),
-                        ambientColor = Color(0xFF6B4EFF),
-                        spotColor = Color(0xFF6B4EFF),
+                        ambientColor = colorResource(R.color.color_FF6B4EFF),
+                        spotColor = colorResource(R.color.color_FF6B4EFF),
                     ),
             visible = !selectionEnabled,
             enter = fadeIn(),
@@ -220,18 +231,18 @@ fun NoteListScreen(
 
     if (shouldShowConfirmationDialog) {
         AlertDialog(
-            title = { Text(text = "Delete Notes") },
-            text = { Text(text = "Are you sure you want to delete all selected items?") },
+            title = { Text(text = stringResource(R.string.title_delete_notes)) },
+            text = { Text(text = stringResource(R.string.message_delete_notes_confirmation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         deleteSelectedNotes()
                         hideConfirmationDialog()
                     },
-                ) { Text(text = "Delete") }
+                ) { Text(text = stringResource(R.string.button_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = hideConfirmationDialog) { Text(text = "Cancel") }
+                TextButton(onClick = hideConfirmationDialog) { Text(text = stringResource(R.string.button_cancel)) }
             },
             onDismissRequest = hideConfirmationDialog,
         )
@@ -269,12 +280,12 @@ private fun AppBarStartContent(
     }
     if (selectionEnabled) {
         Text(
-            text = "$selectedCount selected",
+            text = stringResource(R.string.title_selected, selectedCount),
             fontSize = 22.sp,
         )
     } else {
         Text(
-            text = "Notes",
+            text = stringResource(R.string.title_notes),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -286,7 +297,8 @@ fun NoteList(
     modifier: Modifier = Modifier,
     notes: List<SelectableNote>,
     isSelectionEnabled: Boolean = false,
-    isLoadingMore: Boolean,
+    isLoadingMore: Boolean = false,
+    reachedEnd: Boolean = false,
     columnCount: Int = 2,
     onNoteClick: (SelectableNote) -> Unit = {},
     onNoteLongClick: (SelectableNote) -> Unit = {},
@@ -311,6 +323,13 @@ fun NoteList(
             loadMoreNotes()
         }
     }
+
+    val isScrollingDown = lazyGridState.isScrollingDown()
+    LaunchedEffect(isScrollingDown) {
+        if (isScrollingDown) {
+            Logger.debug("Scrolling down")
+        }
+    }
     LazyVerticalGrid(
         modifier = modifier.fillMaxHeight(),
         columns = GridCells.Fixed(columnCount),
@@ -321,21 +340,33 @@ fun NoteList(
     ) {
         items(
             count = notes.size,
-            key = { index -> notes[index].id ?: 0 },
+            key = { index -> notes[index].id ?: notes[index].lastEdit },
         ) { index ->
             val note = notes[index]
             NoteItem(
-                title = note.title,
-                lastEdit = note.lastEditStr,
-                contents = note.contents,
                 modifier =
                     Modifier
                         .height(280.dp),
+                title = note.title,
+                lastEdit = note.lastEditStr,
+                contents = note.contents,
                 isSelectionEnabled = isSelectionEnabled,
                 isSelected = note.isSelected,
                 onNoteClick = { onNoteClick(note) },
                 onNoteLongClick = { onNoteLongClick(note) },
             )
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            AnimatedVisibility(
+                visible = reachedEnd && isScrollingDown,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                Text(
+                    text = stringResource(R.string.message_no_more_notes),
+                    color = Color.Gray, textAlign = TextAlign.Center
+                )
+            }
         }
 
         if (isLoadingMore) {
@@ -349,16 +380,44 @@ fun NoteList(
                 }
 
             }
-        } else {
-            // Space for FAB
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Spacer(
-                    modifier = Modifier
-                        .height(96.dp),
-                )
+        }
+
+        // Space for FAB
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            val paddingBottom = if (isLoadingMore) {
+                if (isSelectionEnabled) {
+                    56.dp
+                } else {
+                    0.dp
+                }
+            } else {
+                96.dp
             }
+            Spacer(
+                modifier = Modifier.height(
+                    paddingBottom
+                )
+            )
         }
     }
+}
+
+@Composable
+private fun LazyGridState.isScrollingDown(): Boolean {
+    var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
+    var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
+    return remember(this) {
+        derivedStateOf {
+            if (previousIndex != firstVisibleItemIndex) {
+                previousIndex <= firstVisibleItemIndex
+            } else {
+                previousScrollOffset < firstVisibleItemScrollOffset
+            }.also {
+                previousIndex = firstVisibleItemIndex
+                previousScrollOffset = firstVisibleItemScrollOffset
+            }
+        }
+    }.value
 }
 
 @Preview(showBackground = true)

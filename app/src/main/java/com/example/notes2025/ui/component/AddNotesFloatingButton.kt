@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.notes2025.R
 
 @Composable
 fun AddNotesFloatingButton(
@@ -23,7 +26,7 @@ fun AddNotesFloatingButton(
     FloatingActionButton(
         modifier = modifier,
         onClick = onClick,
-        containerColor = Color(0xFF6B4EFF),
+        containerColor = colorResource(R.color.color_FF6B4EFF),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -35,7 +38,7 @@ fun AddNotesFloatingButton(
             )
             AnimatedVisibility(visible = isExpanded) {
                 Text(
-                    text = "Add New Notes",
+                    text = stringResource(R.string.button_add_new_notes),
                     modifier =
                         Modifier
                             .padding(start = 8.dp, top = 3.dp),

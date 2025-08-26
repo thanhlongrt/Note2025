@@ -25,12 +25,7 @@ interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY lastEdit DESC")
     suspend fun getNotes(): List<NoteEntity>
 
-    @Query(
-        value = """
-            DELETE FROM notes
-            WHERE id in (:ids)
-        """,
-    )
+    @Query(value = "DELETE FROM notes WHERE id in (:ids)")
     suspend fun deleteNotes(ids: List<Int>)
 
     @Query("SELECT * FROM notes ORDER BY lastEdit DESC LIMIT :limit OFFSET :offset")

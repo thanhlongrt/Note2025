@@ -10,22 +10,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.notes2025.R
 import com.example.notes2025.ui.component.NotesTopAppBar
 import com.example.notes2025.ui.feature.noteedit.uimodel.EditableNote
 import com.example.notes2025.ui.feature.noteedit.viewmodel.NoteEditViewModel
@@ -67,7 +71,7 @@ fun NoteEditRoute(
         },
         saveNote = {
             navController.popBackStack()
-            noteListViewModel.onNoteAddedOrUpdated(
+            noteListViewModel.addOrUpdateNote(
                 viewModel.currentNote.value,
             )
         },
@@ -97,6 +101,7 @@ fun NoteEditScreen(
                     modifier =
                         Modifier
                             .size(48.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .clickable(true) {
                                 keyboardController?.hide()
                                 popBackStack()
@@ -114,6 +119,7 @@ fun NoteEditScreen(
                     modifier =
                         Modifier
                             .size(48.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .clickable(true) {
                                 keyboardController?.hide()
                                 saveNote()
@@ -123,7 +129,7 @@ fun NoteEditScreen(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Save",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = colorResource(R.color.color_FF6B4EFF),
                     )
                 }
                 Spacer(modifier = Modifier.size(10.dp))
@@ -156,7 +162,7 @@ fun NoteEditScreen(
                 ) {
                     if (note?.title.isNullOrEmpty()) {
                         Text(
-                            text = "Enter title..",
+                            text = stringResource(R.string.hint_title),
                             color = Color.Gray
                         )
 
@@ -186,7 +192,7 @@ fun NoteEditScreen(
                 ) {
                     if (note?.contents.isNullOrEmpty()) {
                         Text(
-                            text = "Enter your contents...",
+                            text = stringResource(R.string.hint_enter_your_contents),
                             color = Color.Gray
                         )
 

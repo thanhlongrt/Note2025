@@ -24,17 +24,6 @@ object DateUtils {
         return dateToString(date = date, format = format)
     }
 
-    fun stringToDate(
-        dateString: String,
-        format: String = FORMAT_ddMM,
-    ): Date? =
-        try {
-            val sdf = SimpleDateFormat(format, Locale.getDefault())
-            sdf.parse(dateString)
-        } catch (e: Exception) {
-            null
-        }
-
     fun currentTimeStamp(): Long = System.currentTimeMillis()
 
     fun getDateStringToday(): String = dateToString(Date())
