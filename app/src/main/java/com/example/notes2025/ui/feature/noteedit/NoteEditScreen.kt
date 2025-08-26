@@ -14,9 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,9 +66,6 @@ fun NoteEditRoute(
         note = currentNote,
         onTitleChange = viewModel::updateTitle,
         onContentsChange = viewModel::updateContents,
-        popBackStack = {
-            navController.popBackStack()
-        },
         saveNote = {
             navController.popBackStack()
             noteListViewModel.addOrUpdateNote(
@@ -84,7 +81,6 @@ fun NoteEditScreen(
     note: EditableNote? = null,
     onTitleChange: (String) -> Unit = {},
     onContentsChange: (String) -> Unit = {},
-    popBackStack: () -> Unit = {},
     saveNote: () -> Unit = {},
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -96,23 +92,12 @@ fun NoteEditScreen(
     ) {
         NotesTopAppBar(
             startContent = {
-                Spacer(modifier = Modifier.size(10.dp))
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .clickable(true) {
-                                keyboardController?.hide()
-                                popBackStack()
-                            },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                    )
-                }
+                Spacer(modifier = Modifier.size(24.dp))
+                Text(
+                    text = if (note?.id == null) "Add" else "Edit",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                )
             },
             endContent = {
                 Box(
@@ -135,22 +120,16 @@ fun NoteEditScreen(
                 Spacer(modifier = Modifier.size(10.dp))
             },
         )
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = 0.5.dp,
-            color = Color.Gray,
-        )
+
         BasicTextField(
-            modifier =
-                Modifier
-                    .background(Color.White)
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth(),
             maxLines = 2,
             textStyle =
                 TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                 ),
             value = note?.title.orEmpty(),
             onValueChange = { newValue ->
@@ -158,7 +137,12 @@ fun NoteEditScreen(
             },
             decorationBox = { innerTextField ->
                 Box(
-                    contentAlignment = Alignment.TopStart
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp)
+                        .padding(bottom = 4.dp),
+                    contentAlignment = Alignment.TopStart,
                 ) {
                     if (note?.title.isNullOrEmpty()) {
                         Text(
@@ -171,6 +155,16 @@ fun NoteEditScreen(
                 }
             },
         )
+
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .padding(horizontal = 16.dp),
+            thickness = 0.5.dp,
+            color = Color.LightGray,
+        )
+
         BasicTextField(
             modifier =
                 Modifier
@@ -178,6 +172,7 @@ fun NoteEditScreen(
             textStyle =
                 TextStyle(
                     fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                 ),
             value = note?.contents.orEmpty(),
             onValueChange = { newValue ->
@@ -186,8 +181,9 @@ fun NoteEditScreen(
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier
-                        .background(Color.White)
-                        .padding(horizontal = 16.dp),
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 12.dp),
                     contentAlignment = Alignment.TopStart,
                 ) {
                     if (note?.contents.isNullOrEmpty()) {

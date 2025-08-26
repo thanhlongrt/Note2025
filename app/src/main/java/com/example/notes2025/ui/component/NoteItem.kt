@@ -7,6 +7,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,11 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.notes2025.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -36,7 +40,6 @@ fun NoteItem(
     modifier: Modifier = Modifier,
     isSelectionEnabled: Boolean = false,
     isSelected: Boolean = false,
-    color: Color = Color.White,
     onNoteClick: () -> Unit = {},
     onNoteLongClick: () -> Unit = {},
 ) {
@@ -46,12 +49,18 @@ fun NoteItem(
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(size = 20.dp),
-                    ambientColor = Color(0x806B4EFF),
-                    spotColor = Color(0x806B4EFF),
+                    ambientColor = colorResource(R.color.color_FF6B4EFF),
+                    spotColor = colorResource(R.color.color_FF6B4EFF),
                 )
                 .clip(RoundedCornerShape(size = 20.dp))
                 .background(
-                    color = color,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                )
+                .border(
+                    width = if (isSelected) 0.5.dp else 0.dp,
+                    color = if (isSelected) colorResource(R.color.color_FF6B4EFF)
+                    else MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(size = 20.dp)
                 )
                 .combinedClickable(
                     onClick = {
@@ -103,7 +112,6 @@ fun NoteItem(
             Text(
                 text = contents,
                 fontSize = 14.sp,
-                maxLines = 10,
                 overflow = TextOverflow.Ellipsis,
             )
         }

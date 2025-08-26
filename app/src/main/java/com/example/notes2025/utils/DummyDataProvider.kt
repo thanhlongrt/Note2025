@@ -14,6 +14,7 @@ object DummyDataProvider {
     fun dummyNotes() =
         listOf(
             SelectableNote(
+                id = 1,
                 title = "Note 1",
                 contents =
                     "Last week, I had a business trip to Japan with my co-workers.\n" +
@@ -28,6 +29,7 @@ object DummyDataProvider {
                         "It was a wonderful experience, I would love to go back there again.",
             ),
             SelectableNote(
+                id = 2,
                 title = "Note 2",
                 contents =
                     "I’d like to tell you about a memorable birthday party I attended.\n" +
@@ -40,6 +42,7 @@ object DummyDataProvider {
                         "Everyone had a great time laughing and enjoying themselves.",
             ),
             SelectableNote(
+                id = 3,
                 title = "Note 3",
                 contents =
                     "One of my favorite times of the year is summer vacation.\n" +
@@ -52,6 +55,7 @@ object DummyDataProvider {
                         "I always look forward to this occasion every year.\n",
             ),
             SelectableNote(
+                id = 4,
                 title = "Note 4",
                 contents =
                     "Do you prefer traveling alone or with friends?\n" +
@@ -59,6 +63,7 @@ object DummyDataProvider {
                         "Having your best friends around and do ",
             ),
             SelectableNote(
+                id = 5,
                 title = "Note 5",
                 contents =
                     "Would you rather visit popular tourist destinations or hidden, quiet places?\n" +
@@ -69,6 +74,7 @@ object DummyDataProvider {
                         "I love traveling to places where I can truly feel and appreciate every moment.",
             ),
             SelectableNote(
+                id = 6,
                 title = "Note 6",
                 contents =
                     "Do you prefer fast food or traditional meals? \n" +
@@ -77,10 +83,12 @@ object DummyDataProvider {
                         "In fact, I always advise people to avoid fast food to protect their health.",
             ),
             SelectableNote(
+                id = 7,
                 title = "Note 7",
                 contents = "Given the choice, I’d rather work at the office because I like seeing people.",
             ),
             SelectableNote(
+                id = 8,
                 title = "Note 8",
                 contents =
                     "D: Hi L! Long time no see. How have you been?\n" +
@@ -110,6 +118,7 @@ object DummyDataProvider {
                         "D: Bye, L!",
             ),
             SelectableNote(
+                id = 9,
                 title = "Note 9",
                 contents =
                     "Last week, I had a business trip to Japan with my co-workers.\n" +
@@ -124,6 +133,7 @@ object DummyDataProvider {
                         "It was a wonderful experience, I would love to go back there again.",
             ),
             SelectableNote(
+                id = 10,
                 title = "Note 10",
                 contents =
                     "1. Luggage\n" +
@@ -136,10 +146,12 @@ object DummyDataProvider {
                         "8. Arriving",
             ),
             SelectableNote(
+                id = 11,
                 title = "Note 11",
                 contents = "Several years ago, a very strange thing happened to me.",
             ),
             SelectableNote(
+                id = 12,
                 title = "Note 12",
                 contents = "Several years ago, a very strange thing happened to me.",
             ),

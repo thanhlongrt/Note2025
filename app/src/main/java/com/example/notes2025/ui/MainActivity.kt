@@ -26,7 +26,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NotesApp() {
     Notes2025Theme(
-        darkTheme = false,
         dynamicColor = false,
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
