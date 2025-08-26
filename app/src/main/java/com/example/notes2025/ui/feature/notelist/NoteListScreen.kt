@@ -54,6 +54,7 @@ import com.example.notes2025.R
 import com.example.notes2025.model.Note
 import com.example.notes2025.ui.NoteEditDestination
 import com.example.notes2025.ui.component.AddNotesFloatingButton
+import com.example.notes2025.ui.component.EmptyView
 import com.example.notes2025.ui.component.NoteCheckBox
 import com.example.notes2025.ui.component.NoteItem
 import com.example.notes2025.ui.component.NotesTopAppBar
@@ -105,7 +106,7 @@ fun NoteListRoute(
                 }
             navController.navigate(route)
         },
-//        addDummyData = viewModel::addDummyData, // for development
+        addDummyData = viewModel::addDummyData, // for development
         loadMoreNotes = viewModel::loadMoreNotes,
     )
 }
@@ -165,24 +166,29 @@ fun NoteListScreen(
                     Spacer(modifier = Modifier.size(24.dp))
                 },
             )
-            NoteList(
-                notes = notes,
-                isSelectionEnabled = selectionEnabled,
-                isLoadingMore = isLoadingMore,
-                reachedEnd = reachedEnd,
-                onNoteClick = { note ->
-                    if (selectionEnabled) {
-                        onNoteSelected(note)
-                    } else {
-                        openNoteEditScreen(note.toNote())
-                    }
-                },
-                onNoteLongClick = { note ->
-                    onNoteLongClick(note)
-                },
-                lazyGridState = lazyGridState,
-                loadMoreNotes = loadMoreNotes,
-            )
+
+            if (reachedEnd && notes.isEmpty()) {
+                EmptyView(modifier = Modifier.fillMaxWidth().weight(1f))
+            } else {
+                NoteList(
+                    notes = notes,
+                    isSelectionEnabled = selectionEnabled,
+                    isLoadingMore = isLoadingMore,
+                    reachedEnd = reachedEnd,
+                    onNoteClick = { note ->
+                        if (selectionEnabled) {
+                            onNoteSelected(note)
+                        } else {
+                            openNoteEditScreen(note.toNote())
+                        }
+                    },
+                    onNoteLongClick = { note ->
+                        onNoteLongClick(note)
+                    },
+                    lazyGridState = lazyGridState,
+                    loadMoreNotes = loadMoreNotes,
+                )
+            }
         }
 
         val isExpanded by remember {
