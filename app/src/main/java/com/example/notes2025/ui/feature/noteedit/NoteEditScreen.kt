@@ -1,5 +1,6 @@
 package com.example.notes2025.ui.feature.noteedit
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,7 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -15,23 +18,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +53,6 @@ fun NoteEditRoute(
 
     val noteListViewModel =
         hiltViewModel<NoteListViewModel>(LocalContext.current as ViewModelStoreOwner)
-    Logger.debug("NoteEditRoute composition ${noteListViewModel.hashCode()}")
     LaunchedEffect(noteId) {
         viewModel.fetchNote(noteId)
     }
@@ -89,16 +84,11 @@ fun NoteEditScreen(
     saveNote: () -> Unit = {},
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-        keyboardController?.show()
-    }
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .imePadding(),
+                .imePadding()
     ) {
         NotesTopAppBar(
             startContent = {
@@ -144,10 +134,12 @@ fun NoteEditScreen(
             thickness = 0.5.dp,
             color = Color.Gray,
         )
-        TextField(
+        BasicTextField(
             modifier =
                 Modifier
-                    .fillMaxWidth(),
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(16.dp),
             maxLines = 2,
             textStyle =
                 TextStyle(
@@ -155,53 +147,54 @@ fun NoteEditScreen(
                     fontSize = 22.sp,
                 ),
             value = note?.title.orEmpty(),
-            placeholder = {
-                Text(text = "Title")
-            },
             onValueChange = { newValue ->
                 onTitleChange(newValue)
             },
-            colors =
-                TextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                ),
+            decorationBox = { innerTextField ->
+                Box(
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    if (note?.title.isNullOrEmpty()) {
+                        Text(
+                            text = "Enter title..",
+                            color = Color.Gray
+                        )
+
+                    }
+                    innerTextField()
+                }
+            },
         )
-        TextField(
+        BasicTextField(
             modifier =
                 Modifier
-                    .fillMaxSize()
-                    .focusRequester(focusRequester),
+                    .fillMaxSize(),
             textStyle =
                 TextStyle(
                     fontSize = 16.sp,
                 ),
-            value =
-                TextFieldValue(
-                    text = note?.contents.orEmpty(),
-                    selection = TextRange(note?.contents.orEmpty().length),
-                ),
-            placeholder = {
-                Text(text = "Contents")
-            },
+            value = note?.contents.orEmpty(),
             onValueChange = { newValue ->
-                onContentsChange(newValue.text)
+                onContentsChange(newValue)
             },
-            colors =
-                TextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                ),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.TopStart,
+                ) {
+                    if (note?.contents.isNullOrEmpty()) {
+                        Text(
+                            text = "Enter your contents...",
+                            color = Color.Gray
+                        )
+
+                    }
+                    innerTextField()
+                }
+            },
         )
-        Spacer(Modifier.weight(1f))
     }
 }
 
@@ -215,7 +208,6 @@ fun NoteEditScreenPreview() {
         )
     NoteEditScreen(
         note = note,
-        onTitleChange = {},
-        onContentsChange = {},
+//        contentsState = TextFieldState()
     )
 }

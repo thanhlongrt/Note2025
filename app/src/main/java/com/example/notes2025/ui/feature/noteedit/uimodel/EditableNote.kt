@@ -3,6 +3,7 @@ package com.example.notes2025.ui.feature.noteedit.uimodel
 import com.example.notes2025.model.Note
 import com.example.notes2025.utils.DateUtils
 
+// Might add more fields later
 data class EditableNote(
     val id: Int? = null,
     val title: String = "",

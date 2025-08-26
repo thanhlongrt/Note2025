@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,7 +48,7 @@ import androidx.navigation.NavController
 import com.example.notes2025.model.Note
 import com.example.notes2025.ui.NoteEditDestination
 import com.example.notes2025.ui.component.AddNotesFloatingButton
-import com.example.notes2025.ui.component.CustomCheckBox
+import com.example.notes2025.ui.component.NoteCheckBox
 import com.example.notes2025.ui.component.NoteItem
 import com.example.notes2025.ui.component.NotesTopAppBar
 import com.example.notes2025.ui.component.SelectionPanel
@@ -54,7 +56,6 @@ import com.example.notes2025.ui.feature.notelist.uimodel.SelectableNote
 import com.example.notes2025.ui.feature.notelist.viewmodel.NoteListViewModel
 import com.example.notes2025.ui.feature.notelist.viewmodel.SelectionState
 import com.example.notes2025.utils.DummyDataProvider
-import com.example.notes2025.utils.Logger
 
 @Composable
 fun NoteListRoute(
@@ -62,13 +63,13 @@ fun NoteListRoute(
     navController: NavController,
     viewModel: NoteListViewModel = hiltViewModel(LocalContext.current as ViewModelStoreOwner),
 ) {
-    Logger.debug("NoteListRoute composition ${viewModel.hashCode()}")
     val notes: List<SelectableNote> by viewModel.notes.collectAsStateWithLifecycle()
     val selectedCount by viewModel.selectedCount.collectAsStateWithLifecycle()
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
     val selectionState by viewModel.selectionState.collectAsStateWithLifecycle()
     val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
     val shouldShowConfirmationDialog by viewModel.shouldShowConfirmationDialog.collectAsStateWithLifecycle()
+    val shouldScrollToTop by viewModel.shouldScrollToTop.collectAsStateWithLifecycle()
     NoteListScreen(
         modifier = modifier,
         notes = notes,
@@ -77,6 +78,7 @@ fun NoteListRoute(
         selectionState = selectionState,
         isLoadingMore = isLoadingMore,
         shouldShowConfirmationDialog = shouldShowConfirmationDialog,
+        shouldScrollToTop = shouldScrollToTop,
         clearSelection = viewModel::clearSelection,
         toggleAllSelection = viewModel::toggleAllSelection,
         onNoteSelected = viewModel::onNoteSelected,
@@ -84,6 +86,7 @@ fun NoteListRoute(
         showConfirmationDialog = viewModel::showConfirmationDialog,
         deleteSelectedNotes = viewModel::deleteSelectedNotes,
         hideConfirmationDialog = viewModel::hideConfirmationDialog,
+        resetScrollToTopState = viewModel::resetScrollToTopState,
         openNoteEditScreen = { note ->
             val route =
                 if (note == null) {
@@ -93,7 +96,7 @@ fun NoteListRoute(
                 }
             navController.navigate(route)
         },
-        addDummyData = viewModel::addDummyData,
+//        addDummyData = viewModel::addDummyData, // for development
         loadMoreNotes = viewModel::loadMoreNotes,
     )
 }
@@ -107,6 +110,7 @@ fun NoteListScreen(
     selectionState: SelectionState = SelectionState.Off,
     isLoadingMore: Boolean = false,
     shouldShowConfirmationDialog: Boolean = false,
+    shouldScrollToTop: Boolean = false,
     clearSelection: () -> Unit = {},
     toggleAllSelection: () -> Unit = {},
     onNoteSelected: (SelectableNote) -> Unit = {},
@@ -117,9 +121,16 @@ fun NoteListScreen(
     openNoteEditScreen: (Note?) -> Unit = {},
     addDummyData: () -> Unit = {},
     loadMoreNotes: () -> Unit = {},
+    resetScrollToTopState: () -> Unit = {},
 ) {
     val lazyGridState = rememberLazyGridState()
     val selectionEnabled = selectionState == SelectionState.On
+    LaunchedEffect(shouldScrollToTop) {
+        if (shouldScrollToTop) {
+            resetScrollToTopState()
+            lazyGridState.scrollToItem(0)
+        }
+    }
     BackHandler(
         enabled = selectionEnabled,
         onBack = {
@@ -139,7 +150,8 @@ fun NoteListScreen(
                     )
                 },
                 endContent = {
-                    AppBarEndContent(addDummyData)
+                    // For development
+//                    AppBarEndContent(addDummyData)
                     Spacer(modifier = Modifier.size(24.dp))
                 },
             )
@@ -244,7 +256,7 @@ private fun AppBarStartContent(
     selectedCount: Int,
 ) {
     if (selectionEnabled) {
-        CustomCheckBox(
+        NoteCheckBox(
             modifier =
                 Modifier
                     .padding(end = 18.dp)
@@ -326,12 +338,26 @@ fun NoteList(
             )
         }
 
-        // Space for FAB
-//        repeat(columnCount) {
-//            item {
-//                Spacer(modifier = Modifier.height(96.dp))
-//            }
-//        }
+        if (isLoadingMore) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.fillMaxHeight()
+                    )
+                }
+
+            }
+        } else {
+            // Space for FAB
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(
+                    modifier = Modifier
+                        .height(96.dp),
+                )
+            }
+        }
     }
 }
 
